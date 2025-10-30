@@ -9,7 +9,6 @@ export default function Login() {
   const [submitting, setSubmitting] = useState(false);
   const navigate = useNavigate();
 
-  // If already authenticated, go to dashboard
   useEffect(() => {
     if (user) navigate("/dashboard", { replace: true });
   }, [user, navigate]);

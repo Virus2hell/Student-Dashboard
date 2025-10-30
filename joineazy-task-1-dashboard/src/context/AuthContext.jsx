@@ -11,7 +11,15 @@ export function AuthProvider({ children }) {
     seedIfEmpty();
     try {
       const raw = localStorage.getItem("je.currentUser");
-      if (raw) setUser(JSON.parse(raw));
+      const users = storage.get("users") || [];
+      if (raw) {
+        const parsed = JSON.parse(raw);
+        const exists = users.find(
+          (u) => u.id === parsed.id && u.email === parsed.email && u.role === parsed.role
+        );
+        if (exists) setUser(exists);
+        else localStorage.removeItem("je.currentUser");
+      }
     } finally {
       setHydrated(true);
     }
@@ -33,7 +41,6 @@ export function AuthProvider({ children }) {
   };
 
   const value = useMemo(() => ({ user, hydrated, login, logout }), [user, hydrated]);
-
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }
 
