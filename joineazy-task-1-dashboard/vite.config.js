@@ -10,5 +10,5 @@ export default defineConfig({
       },
     }),
   ],
-  base: process.env.VITE_BASE_PATH || '/Student-Dashboard'
+  base: process.env.VITE_BASE_PATH || '/',
 })
