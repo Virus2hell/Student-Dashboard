@@ -10,25 +10,37 @@ export default function AssignmentCard({ a, mode }) {
   const { user } = useAuth();
   const [dialog, setDialog] = useState({ open: false, step: 1 });
 
-  const subs = storage.get("submissions") || [];
+  // Local reactive copies so we can re-render without hard reloads
+  const [subs, setSubs] = useState(() => storage.get("submissions") || []);
   const users = storage.get("users") || [];
 
-  const allForA = subs.filter(s => s.assignmentId === a.id);
-  const mySub = subs.find(s => s.assignmentId === a.id && s.studentId === user.id);
+  const allForA = subs.filter((s) => s.assignmentId === a.id);
+  const mySub = subs.find((s) => s.assignmentId === a.id && s.studentId === user.id);
 
-  const submittedCount = allForA.filter(s => s.status === "submitted").length;
-  const totalCount = allForA.length || users.filter(u => u.role === "student").length;
-  const progress = Math.round((submittedCount / totalCount) * 100);
+  const submittedCount = allForA.filter((s) => s.status === "submitted").length;
+  const totalCount = allForA.length || users.filter((u) => u.role === "student").length;
+  const progress = Math.round((submittedCount / Math.max(totalCount, 1)) * 100);
 
   const handleConfirm = () => {
+    // Prepare new submissions array with current user's submission updated/created
     const next = subs.slice();
-    const idx = next.findIndex(s => s.assignmentId === a.id && s.studentId === user.id);
-    const payload = { id: uid(), assignmentId: a.id, studentId: user.id, status: "submitted", submittedAt: new Date().toISOString() };
+    const idx = next.findIndex((s) => s.assignmentId === a.id && s.studentId === user.id);
+    const payload = {
+      id: idx >= 0 ? next[idx].id : uid(),
+      assignmentId: a.id,
+      studentId: user.id,
+      status: "submitted",
+      submittedAt: new Date().toISOString()
+    };
     if (idx >= 0) next[idx] = { ...next[idx], ...payload };
     else next.push(payload);
+
+    // Persist and re-render
     storage.set("submissions", next);
+    setSubs(next);
+
+    // Close dialog without reloading
     setDialog({ open: false, step: 1 });
-    location.reload();
   };
 
   return (
@@ -40,7 +52,9 @@ export default function AssignmentCard({ a, mode }) {
           <div className="mt-2 flex flex-wrap items-center gap-2 text-sm text-gray-600">
             <span>Due: {format(new Date(a.dueDate), "PP")}</span>
             <span>•</span>
-            <a href={a.driveLink} target="_blank" className="text-brand-600 underline">Drive link</a>
+            <a href={a.driveLink} target="_blank" className="text-brand-600 underline" rel="noreferrer">
+              Drive link
+            </a>
           </div>
         </div>
         <div className="flex items-center gap-2">
@@ -49,9 +63,7 @@ export default function AssignmentCard({ a, mode }) {
               {mySub?.status === "submitted" ? "Submitted" : "Not submitted"}
             </span>
           )}
-          {mode === "admin" && (
-            <span className="badge badge-slate">{submittedCount}/{totalCount} submitted</span>
-          )}
+          {mode === "admin" && <span className="badge badge-slate">{submittedCount}/{totalCount} submitted</span>}
         </div>
       </div>
 
@@ -61,10 +73,16 @@ export default function AssignmentCard({ a, mode }) {
 
       {mode === "student" && (
         <div className="mt-4 flex gap-2">
-          <button className="btn btn-primary" disabled={mySub?.status === "submitted"} onClick={() => setDialog({ open: true, step: 1 })}>
+          <button
+            className="btn btn-primary"
+            disabled={mySub?.status === "submitted"}
+            onClick={() => setDialog({ open: true, step: 1 })}
+          >
             Mark as Submitted
           </button>
-          <a className="btn btn-outline" href={a.driveLink} target="_blank">Open Drive</a>
+          <a className="btn btn-outline" href={a.driveLink} target="_blank" rel="noreferrer">
+            Open Drive
+          </a>
         </div>
       )}
 
