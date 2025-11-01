@@ -24,8 +24,8 @@ Tailwind CSS, date‑fns, clsx.​
 LocalStorage seeding via seed.js and storage.js utilities.​
 
 ## Project structure
-`
-📦 myleakwatch
+```
+📦 joineazy-task-1-dashboard
 ├── 📁 src
 │   ├── 📁 components
 │   │   ├── Navbar.jsx
@@ -57,17 +57,24 @@ LocalStorage seeding via seed.js and storage.js utilities.​
 ├── 📄 package.json
 ├── 📄 README.md
 └── 📄 .gitignore
-`
+```
 
 ## Getting started
 
 ### Installation
+```bash
+cd joineazy-task-1-dashboard
+```
 
-`npm install
-npm run dev`
-Open http://localhost:5173.​
+```bash
+npm install
+```
 
-Demo login emails
+```bash
+npm run dev
+```
+​
+## Demo login emails
 
 Admin: admin@uni.edu​
 
